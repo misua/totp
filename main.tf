@@ -146,9 +146,20 @@ resource "aws_security_group" "nginx_sg" {
   }
 }
 
+# Data source for latest Amazon Linux 2 AMI
+data "aws_ami" "amazon_linux_2" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+}
+
 # NAT Instance
 resource "aws_instance" "nat" {
-  ami                         = "ami-0c55b159cbfafe1f0" # Amazon Linux 2 AMI
+  ami                         = data.aws_ami.amazon_linux_2.id
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.nat_sg.id]
@@ -158,11 +169,10 @@ resource "aws_instance" "nat" {
 
   user_data = <<-EOF
               #!/bin/bash
-              echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
-              sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-              sudo yum install -y iptables-services
-              sudo systemctl enable iptables
-              sudo systemctl start iptables
+              echo 1 > /proc/sys/net/ipv4/ip_forward
+              iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+              yum install -y iptables-services
+              service iptables save
               EOF
 
   tags = {
@@ -191,7 +201,7 @@ resource "aws_route_table_association" "private" {
 
 # Bastion Host
 resource "aws_instance" "bastion" {
-  ami                         = "ami-0c55b159cbfafe1f0" # Amazon Linux 2 AMI
+  ami                         = data.aws_ami.amazon_linux_2.id
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.bastion_sg.id]
@@ -218,7 +228,7 @@ resource "aws_instance" "bastion" {
 
 # NGINX EC2 Instance
 resource "aws_instance" "nginx" {
-  ami                         = "ami-0c55b159cbfafe1f0" # Amazon Linux 2 AMI
+  ami                         = data.aws_ami.amazon_linux_2.id
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.private.id
   vpc_security_group_ids      = [aws_security_group.nginx_sg.id]
@@ -229,9 +239,9 @@ resource "aws_instance" "nginx" {
               #!/bin/bash
               sudo yum update -y
               sudo amazon-linux-extras install nginx1 -y
-              sudo systemctl enable nginx
               sudo systemctl start nginx
-              echo "<html><body><h1>Hello from NGINX!</h1></body></html>" | sudo tee /usr/share/nginx/html/index.html
+              sudo systemctl enable nginx
+              echo "<html><body><h1>Hello from NGINX!</h1></body></html>" > /usr/share/nginx/html/index.html
               EOF
 
   tags = {
