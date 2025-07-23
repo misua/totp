@@ -1,0 +1,41 @@
+Barebones AWS POC with Terraform
+
+Project Overview:
+This project aims to create a proof of concept (POC) for an AWS infrastructure setup using Terraform. The setup includes a bastion host with Google Authenticator for 2FA, an EC2 instance running an NGINX hello demo in a private subnet, and a NAT instance for connection masquerading. The implementation follows a sequential approach to ensure clarity and completeness.
+
+Requirements (Based on Sequential Thinking Steps):
+1. **Component Identification** (Step 1)
+   - Identify core components: bastion host with Google Authenticator, EC2 instance with NGINX hello demo, and NAT instance for connection masquerading.
+   - All components to be set up using Terraform for infrastructure as code.
+
+2. **Network Setup in AWS** (Step 2)
+   - Create a VPC with public and private subnets.
+   - Place bastion host and NAT instance in the public subnet for internet access.
+   - Place NGINX EC2 instance in the private subnet, routing internet-bound traffic through the NAT instance.
+
+3. **Bastion Host Configuration** (Step 3)
+   - Deploy bastion host in the public subnet.
+   - Enable SSH access with Google Authenticator for 2FA.
+   - Implement a one-time setup via user data script to install Google Authenticator and generate a QR code for initial app scanning.
+   - Output instructions for users to SSH into the bastion host and scan the QR code with the Google Authenticator app for setup.
+
+4. **EC2 Instance with NGINX Setup** (Step 4)
+   - Deploy EC2 instance in the private subnet.
+   - Use a user data script to install NGINX and configure it to serve a simple 'Hello' demo page.
+   - Ensure the instance can pull necessary updates and packages through the NAT instance for internet connectivity.
+
+5. **Terraform Configuration and Outputs** (Step 5)
+   - Define all infrastructure components in Terraform configuration files.
+   - Include security groups for controlled access (e.g., SSH to bastion from anywhere, NGINX access only from bastion subnet).
+   - Configure routing to ensure private subnet traffic routes through the NAT instance.
+   - Provide outputs for critical information such as bastion host public IP and Google Authenticator setup instructions.
+
+Success Criteria:
+- Bastion host is accessible via SSH with Google Authenticator 2FA enabled after initial QR code setup.
+- EC2 instance successfully serves an NGINX hello page, accessible through the bastion host.
+- NAT instance properly masquerades connections, allowing the private subnet EC2 instance to access the internet for updates.
+- Entire infrastructure can be deployed and destroyed using Terraform commands.
+
+Additional Notes:
+- The sequential approach ensures each step builds on the previous, from network setup to individual component configuration.
+- Google Authenticator setup is a one-time process during bastion host initialization, after which users use app-generated codes for SSH access.
