@@ -70,20 +70,6 @@ This project sets up a proof-of-concept (POC) AWS infrastructure using Terraform
    ```
    You should see a simple 'Hello from NGINX!' HTML page response.
 
-## Important Post-Deployment Step: Configure NAT Instance Routing
-
-Due to limitations in the current AWS Terraform provider, direct routing to the NAT instance cannot be set automatically. You must manually update the private subnet's route table after deployment:
-
-1. Log in to the AWS Management Console.
-2. Navigate to **VPC** > **Route Tables**.
-3. Find the route table tagged as `private-rt` (associated with the private subnet).
-4. Edit the route for `0.0.0.0/0`:
-   - Remove the current gateway (internet gateway placeholder).
-   - Set the target to the Elastic Network Interface (ENI) of the NAT instance (find the NAT instance in EC2, note its primary network interface).
-5. Save the changes.
-
-This step ensures that the private NGINX instance can access the internet through the NAT instance for updates or external requests.
-
 ## Troubleshooting
 
 - **SSH Connection Issues**: Ensure your SSH key (`aws-key` in AWS) matches the private key you're using locally. Check security group rules if connections are blocked.

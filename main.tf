@@ -170,18 +170,15 @@ resource "aws_instance" "nat" {
   }
 }
 
-# Route Table for Private Subnet
+# Route table for private subnet (routes through NAT instance)
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
-  # Note: Direct routing to NAT instance is not supported in newer AWS provider versions.
-  # After deployment, manually update the route table in AWS console to point to the NAT instance's ENI (Elastic Network Interface)
-  # or use an older provider version if direct routing is required.
+
   route {
     cidr_block = "0.0.0.0/0"
-    # Placeholder for manual configuration post-deployment
-    # This is a workaround since 'instance_id' is not supported.
-    gateway_id = aws_internet_gateway.igw.id  # Temporary placeholder, to be updated manually post-deployment
+    network_interface_id = aws_instance.nat.primary_network_interface_id
   }
+
   tags = {
     Name = "private-rt"
   }
