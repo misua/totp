@@ -27,9 +27,11 @@ node_modules/
 .terraform
 .windsurf
 
-# Ignore Terraform state files
+# Ignore Terraform state files and directories (not the configuration files like main.tf)
 terraform.tfstate
 terraform.tfstate.backup
+*.tfstate
+*.tfstate.backup
 
 # Ignore other common files
 .DS_Store
